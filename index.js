@@ -26,8 +26,9 @@ async function run() {
     console.log("Connected to MongoDB");
 
     const db = client.db("styleSync");
-    const productsCollection = db.collection("products");
     const collection = db.collection("users");
+    const productsCollection = db.collection("products");
+    const reviewsCollection = db.collection("reviews");
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
@@ -91,6 +92,7 @@ async function run() {
       });
     });
 
+    //create product
     app.post("/api/v1/products", async (req, res) => {
       const {
         image,
@@ -160,6 +162,42 @@ async function run() {
         data: result,
       });
     });
+
+    //create reviews
+    app.post("/api/v1/reviews", async (req, res) => {
+      const { review, productId, userName } = req.body;
+      const result = await reviewsCollection.insertOne({
+        review,
+        productId,
+        userName,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Review posted successfully",
+        data: result,
+      });
+    });
+
+    // get reviews by product id
+    app.get("/api/v1/reviews/:productId", async (req, res) => {
+      const { productId } = req.params;
+
+      try {
+        const result = await reviewsCollection
+          .find({ productId: productId })
+          .toArray();
+        res.status(201).json({
+          success: true,
+          message: "Reviews retrieved successfully",
+          data: result,
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    //Get review by product id
 
     // Start the server
     app.listen(port, () => {
