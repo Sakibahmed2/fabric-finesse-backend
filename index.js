@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
@@ -29,6 +29,7 @@ async function run() {
     const collection = db.collection("users");
     const productsCollection = db.collection("products");
     const reviewsCollection = db.collection("reviews");
+    const ordersCollection = db.collection("orders");
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
@@ -172,7 +173,7 @@ async function run() {
         userName,
       });
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         message: "Review posted successfully",
         data: result,
@@ -197,7 +198,22 @@ async function run() {
       }
     });
 
-    //Get review by product id
+    //create orders
+    app.post("/api/v1/orders", async (req, res) => {
+      try {
+        const orderData = req.body;
+
+        const result = await ordersCollection.insertOne(orderData);
+
+        res.status(200).json({
+          success: true,
+          message: "Order placed successfully",
+          data: result,
+        });
+      } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
 
     // Start the server
     app.listen(port, () => {
