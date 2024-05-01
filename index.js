@@ -215,6 +215,37 @@ async function run() {
       }
     });
 
+    //get all orders
+    app.get("/api/v1/orders", async (req, res) => {
+      try {
+        const result = await ordersCollection.find().toArray();
+        res.status(200).json({
+          success: true,
+          message: "Order placed successfully",
+          data: result,
+        });
+      } catch (err) {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    //get user order
+    app.get("/api/v1/orders/:userId", async (req, res) => {
+      const { userId } = req.params;
+      try {
+        const result = await ordersCollection
+          .find({ userId: userId })
+          .toArray();
+        res.status(200).json({
+          success: true,
+          message: "Order placed successfully",
+          data: result,
+        });
+      } catch (err) {
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
     // Start the server
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);
