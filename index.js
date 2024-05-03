@@ -203,6 +203,8 @@ async function run() {
       try {
         const orderData = req.body;
 
+        orderData.createdAt = new Date();
+
         const result = await ordersCollection.insertOne(orderData);
 
         res.status(200).json({
@@ -221,7 +223,7 @@ async function run() {
         const result = await ordersCollection.find().toArray();
         res.status(200).json({
           success: true,
-          message: "Order placed successfully",
+          message: "Order retrieved successfully",
           data: result,
         });
       } catch (err) {
@@ -238,11 +240,33 @@ async function run() {
           .toArray();
         res.status(200).json({
           success: true,
-          message: "Order placed successfully",
+          message: "Order retrieved successfully",
           data: result,
         });
       } catch (err) {
         res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
+    //update order status
+    app.patch("/api/v1/orders/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            status: "delivered",
+          },
+        };
+        const result = await ordersCollection.updateOne(filter, updateDoc);
+
+        res.status(200).json({
+          success: true,
+          message: "Status updated successfully",
+          data: result,
+        });
+      } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
       }
     });
 
